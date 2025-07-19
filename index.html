@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekomendasi Tanaman</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-search {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+
+        .btn-companion {
+            background: linear-gradient(45deg, #FF9800, #F57C00);
+        }
+
+        .results {
+            margin-top: 25px;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 5px solid #4CAF50;
+            transition: transform 0.2s ease;
+        }
+
+        .result-item:hover {
+            transform: translateX(5px);
+        }
+
+        .result-item h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .result-item p {
+            margin: 8px 0;
+            color: #666;
+            font-size: 1em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #4CAF50;
+            font-size: 1.2em;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border: 3px solid #4CAF50;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .tips {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .tips h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .tips ul {
+            margin-left: 20px;
+        }
+
+        .tips li {
+            margin-bottom: 5px;
+            color: #2e7d32;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .search-section {
+            margin-top: 30px;
+        }
+
+        .plant-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .info-item {
+            background: #f0f8f0;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .info-item strong {
+            color: #4CAF50;
+        }
+
+        .emoji {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .companion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .companion-item {
+            background: #f0f8f0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #FF9800;
+            transition: all 0.3s ease;
+        }
+
+        .companion-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .companion-item h4 {
+            color: #FF9800;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .companion-item .plant-details {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .compatibility-score {
+            background: #FF9800;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 Rekomendasi Tanaman</h1>
+            <p>Temukan tanaman yang paling cocok untuk kebun Anda</p>
+        </div>
+
+        <div class="tips">
+            <h3>💡 Tips Penggunaan:</h3>
+            <ul>
+                <li>Pilih musim sesuai dengan kondisi saat ini</li>
+                <li>pH tanah normal berkisar 6.0-7.0</li>
+                <li>Suhu diisi sesuai suhu rata-rata di daerah Anda</li>
+                <li>Sistem akan menampilkan tanaman paling cocok</li>
+                <li>Tanaman pendamping dipilih berdasarkan kecocokan kondisi tumbuh</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>🔍 Cari Tanaman Paling Cocok</h2>
+            <div class="form-group">
+                <label for="musim">🌤️ Musim Sekarang:</label>
+                <select id="musim">
+                    <option value="">Pilih Musim</option>
+                    <option value="kemarau">Kemarau (Kering)</option>
+                    <option value="hujan">Hujan (Basah)</option>
+                    <option value="sepanjang_tahun">Sepanjang Tahun</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ph">🧪 pH Tanah (5.0 - 8.0):</label>
+                <input type="number" id="ph" step="0.1" min="5.0" max="8.0" value="6.5" placeholder="Contoh: 6.5">
+            </div>
+            <div class="form-group">
+                <label for="suhu">🌡️ Suhu Rata-rata (°C):</label>
+                <input type="number" id="suhu" step="0.1" min="15" max="35" value="25" placeholder="Contoh: 25">
+            </div>
+            <button class="btn" onclick="getRecommendations()">Cari Tanaman Paling Cocok</button>
+            
+            <div id="recommendationResults" class="results"></div>
+        </div>
+
+        <div class="card search-section">
+            <h2>🔎 Cari Tanaman Tertentu</h2>
+            <div class="form-group">
+                <label for="plantName">Nama Tanaman:</label>
+                <input type="text" id="plantName" placeholder="Contoh: Tomat, Bayam, Cabai...">
+            </div>
+            <button class="btn btn-search" onclick="searchPlant()">Cari</button>
+            <button class="btn btn-companion" onclick="getCompanions()">Cari Tanaman Pendamping</button>
+            
+            <div id="searchResults" class="results"></div>
+            <div id="companionResults" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // Sample plant data (replace with actual data from tanaman.csv)
+const plantsData = [
+    { nama: "Tomat", jenis: "Buah", musim: "kemarau", ph_min: 5.5, ph_max: 7.0, suhu_min: 18, suhu_max: 27, masa_panen: 75 },
+    { nama: "Bayam", jenis: "Daun", musim: "kemarau", ph_min: 6.0, ph_max: 7.5, suhu_min: 20, suhu_max: 30, masa_panen: 45 },
+    { nama: "Cabai", jenis: "Buah", musim: "kemarau", ph_min: 6.0, ph_max: 7.0, suhu_min: 22, suhu_max: 32, masa_panen: 85 },
+    { nama: "Kolplay", jenis: "Daun", musim: "hujan", ph_min: 6.0, ph_max: 7.5, suhu_min: 15, suhu_max: 24, masa_panen: 60 },
+    { nama: "Wortel", jenis: "Akar", musim: "hujan", ph_min: 6.0, ph_max: 6.8, suhu_min: 15, suhu_max: 20, masa_panen: 90 },
+    { nama: "Sawi", jenis: "Daun", musim: "hujan", ph_min: 5.8, ph_max: 7.2, suhu_min: 18, suhu_max: 28, masa_panen: 40 },
+    { nama: "Kangkung", jenis: "Daun", musim: "sepanjang_tahun", ph_min: 5.5, ph_max: 7.0, suhu_min: 25, suhu_max: 35, masa_panen: 30 },
+    { nama: "Selada", jenis: "Daun", musim: "hujan", ph_min: 6.0, ph_max: 7.0, suhu_min: 15, suhu_max: 25, masa_panen: 50 },
+    { nama: "Brokoli", jenis: "Buah", musim: "hujan", ph_min: 6.0, ph_max: 7.0, suhu_min: 15, suhu_max: 22, masa_panen: 80 },
+    { nama: "Kembang Kol", jenis: "Buah", musim: "hujan", ph_min: 6.0, ph_max: 7.0, suhu_min: 15, suhu_max: 20, masa_panen: 85 },
+    { nama: "Kubis", jenis: "Daun", musim: "hujan", ph_min: 6.0, ph_max: 7.0, suhu_min: 15, suhu_max: 25, masa_panen: 70 },
+    { nama: "Kentang", jenis: "Umbi", musim: "hujan", ph_min: 5.5, ph_max: 6.5, suhu_min: 15, suhu_max: 20, masa_panen: 100 },
+    { nama: "Bawang Merah", jenis: "Umbi", musim: "kemarau", ph_min: 6.0, ph_max: 7.0, suhu_min: 20, suhu_max: 30, masa_panen: 65 },
+    { nama: "Bawang Putih", jenis: "Umbi", musim: "kemarau", ph_min: 6.0, ph_max: 7.0, suhu_min: 15, suhu_max: 25, masa_panen: 120 },
+    { nama: "Jahe", jenis: "Rempah", musim: "sepanjang_tahun", ph_min: 5.5, ph_max: 6.5, suhu_min: 25, suhu_max: 35, masa_panen: 300 },
+    { nama: "Kunyit", jenis: "Rempah", musim: "sepanjang_tahun", ph_min: 5.5, ph_max: 6.5, suhu_min: 25, suhu_max: 35, masa_panen: 270 },
+    { nama: "Lengkuas", jenis: "Rempah", musim: "sepanjang_tahun", ph_min: 5.5, ph_max: 6.5, suhu_min: 25, suhu_max: 35, masa_panen: 280 },
+    { nama: "Serai", jenis: "Herbal", musim: "sepanjang_tahun", ph_min: 6.0, ph_max: 7.0, suhu_min: 20, suhu_max: 30, masa_panen: 90 },
+    { nama: "Daun Bawang", jenis: "Herbal", musim: "sepanjang_tahun", ph_min: 6.0, ph_max: 7.0, suhu_min: 18, suhu_max: 28, masa_panen: 45 },
+    { nama: "Peterseli", jenis: "Herbal", musim: "sepanjang_tahun", ph_min: 6.0, ph_max: 7.0, suhu_min: 15, suhu_max: 25, masa_panen: 60 },
+    { nama: "Kemangi", jenis: "Herbal", musim: "sepanjang_tahun", ph_min: 6.0, ph_max: 7.0, suhu_min: 20, suhu_max: 30, masa_panen: 40 },
+    { nama: "Mentimun", jenis: "Buah", musim: "kemarau", ph_min: 6.0, ph_max: 7.0, suhu_min: 20, suhu_max: 30, masa_panen: 55 },
+    { nama: "Terong", jenis: "Buah", musim: "kemarau", ph_min: 5.5, ph_max: 6.5, suhu_min: 22, suhu_max: 32, masa_panen: 75 },
+    { nama: "Paprika", jenis: "Buah", musim: "kemarau", ph_min: 6.0, ph_max: 7.0, suhu_min: 18, suhu_max: 28, masa_panen: 80 },
+    { nama: "Labu", jenis: "Buah", musim: "kemarau", ph_min: 6.0, ph_max: 7.0, suhu_min: 20, suhu_max: 30, masa_panen: 95 }
+];
+
+        class PlantRecommendationSystem {
+            constructor() {
+                this.plants = plantsData;
+            }
+
+            searchPlant(plantName) {
+                return this.plants.find(plant => 
+                    plant.nama.toLowerCase().includes(plantName.toLowerCase())
+                ) || null;
+            }
+
+            getCompanionPlants(targetPlant) {
+                if (!targetPlant) return [];
+
+                const companions = [];
+                
+                this.plants.forEach(plant => {
+                    if (plant.nama === targetPlant.nama) return;
+                    
+                    let compatibilityScore = 0;
+                    let reasons = [];
+
+                    // Same season compatibility (highest priority)
+                    if (plant.musim === targetPlant.musim || 
+                        plant.musim === 'sepanjang_tahun' || 
+                        targetPlant.musim === 'sepanjang_tahun') {
+                        compatibilityScore += 40;
+                        reasons.push('Musim cocok');
+                    }
+
+                    // pH overlap
+                    const phOverlap = Math.max(0, 
+                        Math.min(plant.ph_max, targetPlant.ph_max) - 
+                        Math.max(plant.ph_min, targetPlant.ph_min)
+                    );
+                    if (phOverlap > 0) {
+                        compatibilityScore += Math.min(25, phOverlap * 10);
+                        reasons.push('pH sesuai');
+                    }
+
+                    // Temperature overlap
+                    const tempOverlap = Math.max(0,
+                        Math.min(plant.suhu_max, targetPlant.suhu_max) - 
+                        Math.max(plant.suhu_min, targetPlant.suhu_min)
+                    );
+                    if (tempOverlap > 0) {
+                        compatibilityScore += Math.min(25, tempOverlap * 2);
+                        reasons.push('Suhu sesuai');
+                    }
+
+                    // Different plant types (complementary)
+                    if (plant.jenis !== targetPlant.jenis) {
+                        compatibilityScore += 10;
+                        reasons.push('Jenis komplementer');
+                    }
+
+                    // Similar harvest time (within 30 days)
+                    const harvestDiff = Math.abs(plant.masa_panen - targetPlant.masa_panen);
+                    if (harvestDiff <= 30) {
+                        compatibilityScore += 10;
+                        reasons.push('Waktu panen serupa');
+                    }
+
+                    if (compatibilityScore >= 30) { // Minimum threshold
+                        companions.push({
+                            plant: plant,
+                            score: Math.round(compatibilityScore),
+                            reasons: reasons
+                        });
+                    }
+                });
+
+                // Sort by compatibility score (descending)
+                return companions
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 8); // Limit to top 8 companions
+            }
+
+            getRecommendations(musim, ph, suhu) {
+                const recommendations = [];
+
+                this.plants.forEach(plant => {
+                    if ((plant.musim === musim || plant.musim === 'sepanjang_tahun') &&
+                        plant.ph_min <= ph && ph <= plant.ph_max &&
+                        plant.suhu_min <= suhu && suhu <= plant.suhu_max) {
+                        const phMid = (plant.ph_min + plant.ph_max) / 2;
+                        const suhuMid = (plant.suhu_min + plant.suhu_max) / 2;
+                        const distance = Math.sqrt((ph - phMid) ** 2 + (suhu - suhuMid) ** 2);
+                        recommendations.push([plant, distance]);
+                    }
+                });
+
+                if (recommendations.length === 0) return null;
+                return recommendations.reduce((best, current) => 
+                    current[1] < best[1] ? current : best, recommendations[0]
+                )[0];
+            }
+        }
+
+        const plantSystem = new PlantRecommendationSystem();
+
+        function getRecommendations() {
+            const musim = document.getElementById('musim').value;
+            const ph = parseFloat(document.getElementById('ph').value);
+            const suhu = parseFloat(document.getElementById('suhu').value);
+
+            if (!musim || isNaN(ph) || isNaN(suhu)) {
+                alert('Mohon isi semua field!');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('recommendationResults');
+            resultsDiv.innerHTML = '<div class="loading">Mencari tanaman paling cocok...</div>';
+
+            setTimeout(() => {
+                const bestPlant = plantSystem.getRecommendations(musim, ph, suhu);
+                displayRecommendations(bestPlant, !!bestPlant);
+            }, 500);
+        }
+
+        function displayRecommendations(plant, found) {
+            const resultsDiv = document.getElementById('recommendationResults');
+            let html = '';
+
+            if (found) {
+                html += '<h3 style="color: #4CAF50; margin-bottom: 20px;">✅ Tanaman Paling Cocok:</h3>';
+                html += `
+                    <div class="result-item">
+                        <h3><span class="emoji">${getPlantEmoji(plant.jenis)}</span>${plant.nama}</h3>
+                        <div class="plant-info">
+                            <div class="info-item">
+                                <strong>Jenis:</strong><br>${plant.jenis}
+                            </div>
+                            <div class="info-item">
+                                <strong>pH Tanah:</strong><br>${plant.ph_min} - ${plant.ph_max}
+                            </div>
+                            <div class="info-item">
+                                <strong>Suhu:</strong><br>${plant.suhu_min}°C - ${plant.suhu_max}°C
+                            </div>
+                            <div class="info-item">
+                                <strong>Masa Panen:</strong><br>${plant.masa_panen} hari
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="no-results">
+                        <h3>😔 Tidak ada tanaman yang cocok</h3>
+                        <p>Coba ubah kondisi atau pilih "Sepanjang Tahun" untuk musim</p>
+                    </div>
+                `;
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+
+        function searchPlant() {
+            const plantName = document.getElementById('plantName').value.trim();
+            
+            if (!plantName) {
+                alert('Mohon masukkan nama tanaman!');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '<div class="loading">Mencari tanaman...</div>';
+
+            setTimeout(() => {
+                const plant = plantSystem.searchPlant(plantName);
+                if (plant) {
+                    resultsDiv.innerHTML = `
+                        <h3 style="color: #4CAF50; margin-bottom: 20px;">✅ Tanaman Ditemukan:</h3>
+                        <div class="result-item">
+                            <h3><span class="emoji">${getPlantEmoji(plant.jenis)}</span>${plant.nama}</h3>
+                            <div class="plant-info">
+                                <div class="info-item">
+                                    <strong>Jenis:</strong><br>${plant.jenis}
+                                </div>
+                                <div class="info-item">
+                                    <strong>pH Tanah:</strong><br>${plant.ph_min} - ${plant.ph_max}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Suhu:</strong><br>${plant.suhu_min}°C - ${plant.suhu_max}°C
+                                </div>
+                                <div class="info-item">
+                                    <strong>Musim:</strong><br>${getMusimText(plant.musim)}
+                                </div>
+                                <div class="info-item">
+                                    <strong>Masa Panen:</strong><br>${plant.masa_panen} hari
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <h3>😔 Tanaman tidak ditemukan</h3>
+                            <p>Coba nama lain atau periksa ejaan</p>
+                        </div>
+                    `;
+                }
+            }, 500);
+        }
+
+        function getCompanions() {
+            const plantName = document.getElementById('plantName').value.trim();
+            
+            if (!plantName) {
+                alert('Mohon masukkan nama tanaman untuk mencari pendamping!');
+                return;
+            }
+
+            const resultsDiv = document.getElementById('companionResults');
+            resultsDiv.innerHTML = '<div class="loading">Mencari tanaman pendamping...</div>';
+
+            setTimeout(() => {
+                const targetPlant = plantSystem.searchPlant(plantName);
+                
+                if (!targetPlant) {
+                    resultsDiv.innerHTML = `
+                        <div class="no-results">
+                            <h3>😔 Tanaman "${plantName}" tidak ditemukan</h3>
+                            <p>Mohon periksa nama tanaman dan coba lagi</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const companions = plantSystem.getCompanionPlants(targetPlant);
+                
+                let html = `<h3 style="color: #FF9800; margin-bottom: 20px;">🌿 Tanaman Pendamping untuk ${targetPlant.nama}:</h3>`;
+                
+                if (companions.length > 0) {
+                    html += '<div class="companion-grid">';
+                    companions.forEach(companion => {
+                        html += `
+                            <div class="companion-item">
+                                <h4>
+                                    <span class="emoji">${getPlantEmoji(companion.plant.jenis)}</span>
+                                    ${companion.plant.nama}
+                                    <span class="compatibility-score">${companion.score}%</span>
+                                </h4>
+                                <div class="plant-details">
+                                    <strong>Jenis:</strong> ${companion.plant.jenis}<br>
+                                    <strong>Musim:</strong> ${getMusimText(companion.plant.musim)}<br>
+                                    <strong>pH:</strong> ${companion.plant.ph_min}-${companion.plant.ph_max}<br>
+                                    <strong>Suhu:</strong> ${companion.plant.suhu_min}-${companion.plant.suhu_max}°C<br>
+                                    <strong>Panen:</strong> ${companion.plant.masa_panen} hari<br>
+                                    <strong>Alasan:</strong> ${companion.reasons.join(', ')}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    html += `
+                        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                            <strong>💡 Tips Penanaman Bersama:</strong>
+                            <ul style="margin: 10px 0 0 20px;">
+                                <li>Pilih tanaman dengan skor kompatibilitas tinggi (>70%)</li>
+                                <li>Perhatikan jarak tanam untuk menghindari persaingan</li>
+                                <li>Tanaman dengan jenis berbeda sering saling melengkapi</li>
+                                <li>Sesuaikan jadwal penyiraman dan pemupukan</li>
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="no-results">
+                            <h3>🤔 Belum ada tanaman pendamping yang sangat cocok</h3>
+                            <p>Coba cari tanaman lain atau pertimbangkan kondisi tumbuh yang berbeda</p>
+                        </div>
+                    `;
+                }
+                
+                resultsDiv.innerHTML = html;
+            }, 800);
+        }
+
+        function getPlantEmoji(jenis) {
+            const emojiMap = {
+                'buah': '🍅',
+                'daun': '🥬', 
+                'akar': '🥕',
+                'umbi': '🥔',
+                'herbal': '🌿',
+                'rempah': '🧄'
+            };
+            return emojiMap[jenis.toLowerCase()] || '🌱';
+        }
+
+        function getMusimText(musim) {
+            const seasonMap = {
+                'kemarau': 'Kemarau',
+                'hujan': 'Hujan', 
+                'sepanjang_tahun': 'Sepanjang Tahun'
+            };
+            return seasonMap[musim] || musim;
+        }
+    </script>
+</body>
+</html>
